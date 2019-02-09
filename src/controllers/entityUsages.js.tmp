@@ -1,0 +1,64 @@
+import resource from 'resource-router-middleware';
+import schema from '../models/schema';
+
+var userId = '5b152aa3-9c4f-4394-b23a-1fb0fc9ac30f';
+
+export default (db) => resource({
+
+	/** Property name to store preloaded entity on `request`. */
+	id : 'entityUsage',
+
+	/** For requests with an `id`, you can auto-load the entity.
+	 *  Errors terminate the request, success sets `req[id] = data`.
+	 */
+	/*load(req, id, callback) {
+		return schema(db).EntityUsage.query().findById(id).then(entityUsage => {
+			callback(entityUsage ? null : 'Not found', entityUsage)
+		})
+	},*/
+
+	/** GET / - List all entities */
+	/*index({ params }, res) {
+		return schema(db).EntityUsage.query().then(entityUsages => {
+			res.json(entityUsages)
+		});
+	},*/
+
+	/** POST / - Create a new entity */
+	create({ body }, res) {
+		const realms = [];
+		const entities = [];
+
+		return schema(db).EntityUsage.query()
+			.insert(body)
+			.returning('*')
+			.then(entityUsage => {
+				res.json(entityUsage)
+			})
+	},
+
+	/** GET /:id - Return a given entity */
+	/*read({ entityUsage }, res) {
+		return res.json(entityUsage);
+	},*/
+
+	/** PUT /:id - Update a given entity */
+	/*update({ entityUsage, body }, res) {
+		return schema(db).EntityUsage.query()
+			.patch({friendly_name: body.friendly_name})
+			.where('id', entityUsage.id)
+			.returning('*')
+			.first()
+			.then(entityUsage => {
+				res.json(entityUsage)
+			})
+	},*/
+
+	/** DELETE /:id - Delete a given entity */
+	/*delete({ entityUsage }, res) {
+		return schema(db).EntityUsage.query()
+			.deleteById(entityUsage.id).then(() => {
+				res.sendStatus(204);
+		})
+	}*/
+});

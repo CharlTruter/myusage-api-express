@@ -1,0 +1,58 @@
+import resource from 'resource-router-middleware';
+import schema from '../models/schema';
+
+export default (db) => resource({
+
+	/** Property name to store preloaded entity on `request`. */
+	id : 'entity',
+
+	/** For requests with an `id`, you can auto-load the entity.
+	 *  Errors terminate the request, success sets `req[id] = data`.
+	 */
+	load(req, id, callback) {
+		return schema(db).Entity.query().findById(id).then(entity => {
+			callback(entity ? null : 'Not found', entity)
+		})
+	},
+
+	/** GET / - List all entities */
+	index({ params }, res) {
+		return schema(db).Entity.query().then(entities => {
+			res.json(entities)
+		});
+	},
+
+	/** POST / - Create a new entity */
+	create({ body }, res) {
+		return schema(db).Entity.query()
+			.insert(body)
+			.returning('*')
+			.then(entity => {
+				res.json(entity)
+			})
+	},
+
+	/** GET /:id - Return a given entity */
+	read({ entity }, res) {
+		return res.json(entity);
+	},
+
+	/** PUT /:id - Update a given entity */
+	update({ entity, body }, res) {
+		return schema(db).Entity.query()
+			.patch({friendly_name: body.friendly_name})
+			.where('id', entity.id)
+			.returning('*')
+			.first()
+			.then(entity => {
+				res.json(entity)
+			})
+	},
+
+	/** DELETE /:id - Delete a given entity */
+	delete({ entity }, res) {
+		return schema(db).Entity.query().deleteById(entity.id).then(() => {
+			res.sendStatus(204);
+		})
+	}
+});

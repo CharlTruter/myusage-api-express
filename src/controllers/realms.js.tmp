@@ -1,0 +1,53 @@
+import resource from 'resource-router-middleware';
+import realmRepository from '../repositories/realm';
+
+var userId = '5b152aa3-9c4f-4394-b23a-1fb0fc9ac30f';
+
+export default (db) => resource({
+
+	/** Property name to store preloaded entity on `request`. */
+	id : 'realm',
+
+	/** For requests with an `id`, you can auto-load the entity.
+	 *  Errors terminate the request, success sets `req[id] = data`.
+	 */
+	load(req, id, callback) {
+		return realmRepository(db)
+			.GetRealmById(id, userId)
+			.then(realm => {
+				callback(realm ? null : 'Not found', realm)
+			})
+	},
+
+	/** GET / - List all entities */
+	index({ params }, res) {
+		return realmRepository(db)
+			.GetAllRealms(userId)
+			.then(realms => {
+				return res.json(realms);
+			})
+	},
+
+	/** POST / - Create a new entity */
+	create({ body }, res) {
+		return realmRepository(db)
+			.InsertRealm(body)
+			.then(realm => {
+				return res.json(realm);
+			})
+	},
+
+	/** GET /:id - Return a given entity */
+	read({ realm }, res) {
+		return res.json(realm);
+	},
+
+	/** PUT /:id - Update a given entity */
+	update({ realm, body }, res) {
+		return realmRepository(db)
+			.UpdateRealm(realm.id, body, userId)
+			.then(realm => {
+				res.json(realm)
+			});
+	},
+});
